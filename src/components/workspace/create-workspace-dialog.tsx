@@ -20,6 +20,7 @@ import { useFileUpload } from "~/hooks/use-file-upload";
 import { toast } from "sonner";
 import { toSlug } from "~/lib/to-slug";
 import { IMAGE_TYPES, IMAGE_ACCEPT } from "~/lib/constants/file-types";
+import { toBase64 } from "~/lib/to-base-64";
 
 type Props = {
   open: boolean;
@@ -61,13 +62,7 @@ export function CreateWorkSpace({ open, onOpenChange }: Props) {
 
       // 1. upload file if selected
       if (file) {
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () =>
-            resolve((reader.result as string).split(",")[1]!);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        const base64 = await toBase64(file);
 
         const result = await uploadFile.mutateAsync({
           filename: file.name,

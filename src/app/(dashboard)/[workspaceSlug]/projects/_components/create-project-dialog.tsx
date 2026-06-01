@@ -34,6 +34,7 @@ import { ProjectStatus, Priority } from "@prisma/client";
 import { format } from "date-fns";
 import { cn } from "~/lib/utils";
 import type { Project } from "~/types";
+import { COLOR_OPTIONS, PRIORITY_OPTIONS, STATUS_OPTIONS } from "~/lib/project-options";
 
 type Props = {
   open: boolean;
@@ -41,30 +42,6 @@ type Props = {
   workspaceId: string;
   project?: Project | null;
 };
-
-const statusOptions = [
-  { value: ProjectStatus.ACTIVE, label: "Active" },
-  { value: ProjectStatus.ON_HOLD, label: "On Hold" },
-  { value: ProjectStatus.COMPLETED, label: "Completed" },
-  { value: ProjectStatus.ARCHIVED, label: "Archived" },
-];
-
-const priorityOptions = [
-  { value: Priority.LOW, label: "Low" },
-  { value: Priority.MEDIUM, label: "Medium" },
-  { value: Priority.HIGH, label: "High" },
-  { value: Priority.URGENT, label: "Urgent" },
-];
-
-const colorOptions = [
-  { value: "#6366f1", label: "Indigo" },
-  { value: "#8b5cf6", label: "Violet" },
-  { value: "#ec4899", label: "Pink" },
-  { value: "#f97316", label: "Orange" },
-  { value: "#22c55e", label: "Green" },
-  { value: "#14b8a6", label: "Teal" },
-  { value: "#3b82f6", label: "Blue" },
-];
 
 export function CreateProjectDialog({
   open,
@@ -218,7 +195,7 @@ export function CreateProjectDialog({
               </SelectTrigger>
 
               <SelectContent>
-                {statusOptions.map((s) => (
+                {STATUS_OPTIONS.map((s) => (
                   <SelectItem key={s.value} value={s.value}>
                     {s.label}
                   </SelectItem>
@@ -240,7 +217,7 @@ export function CreateProjectDialog({
               </SelectTrigger>
 
               <SelectContent>
-                {priorityOptions.map((p) => (
+                {PRIORITY_OPTIONS.map((p) => (
                   <SelectItem key={p.value} value={p.value}>
                     {p.label}
                   </SelectItem>
@@ -286,7 +263,7 @@ export function CreateProjectDialog({
             <Label className="pt-1">Cover Color</Label>
 
             <div className="flex flex-wrap gap-2">
-              {colorOptions.map((color) => (
+              {COLOR_OPTIONS.map((color) => (
                 <button
                   key={color.value}
                   type="button"
