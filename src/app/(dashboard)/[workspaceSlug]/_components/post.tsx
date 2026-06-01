@@ -33,13 +33,33 @@ export function LatestPost() {
         <input
           type="text"
           placeholder="Title"
+          required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-full bg-white/10 px-4 py-2 text-white"
+          className="
+            w-full rounded-full
+            border border-input
+            bg-background
+            px-4 py-2
+            text-foreground
+          "
         />
+
+        {createPost.error && (
+          <p className="text-sm text-foreground">{"Invalid Post"}</p>
+        )}
+
         <button
           type="submit"
-          className="rounded-full bg-white/10 px-10 py-3 font-semibold transition hover:bg-white/20"
+          className="
+            rounded-full
+            bg-primary
+            text-primary-foreground
+            px-10 py-3
+            font-semibold
+            transition
+            hover:opacity-90
+          "
           disabled={createPost.isPending}
         >
           {createPost.isPending ? "Submitting..." : "Submit"}

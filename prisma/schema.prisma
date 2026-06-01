@@ -3,7 +3,7 @@
 
 generator client {
     provider = "prisma-client-js"
-    output   = "../generated/prisma"
+    // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -16,60 +16,234 @@ datasource db {
 }
 
 model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
+  @@index([name])
 }
 
-// Necessary for Next auth
 model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? // @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
+}
+
+model User {
+  id                String            @id @default(cuid())
+  name              String?
+  email             String?           @unique
+  emailVerified     DateTime?
+  image             String?
+  accounts          Account[]
+  activityLogs      ActivityLog[]
+  attachments       Attachment[]
+  comments          Comment[]
+  posts             Post[]
+  projectsCreated   Project[]         @relation("ProjectCreatedBy")
+  projectsUpdated   Project[]         @relation("ProjectUpdatedBy")
+  projectInvited    ProjectMember[]   @relation("MemberInviter")
+  projectMembers    ProjectMember[]   @relation("MemberUser")
+  sessions          Session[]
+  tasksAssigned     Task[]            @relation("TaskAssignee")
+  tasksCreated      Task[]            @relation("TaskCreatedBy")
+  workspacesCreated Workspace[]       @relation("WorkspaceCreatedBy")
+  workspacesUpdated Workspace[]       @relation("WorkspaceUpdatedBy")
+  membersInvited    WorkspaceMember[] @relation("MemberInviter")
+  workspaceMembers  WorkspaceMember[] @relation("MemberUser")
+}
+
+model Workspace {
+  id          String            @id @default(cuid())
+  name        String
+  logoUrl     String?
+  slug        String            @unique
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  createdById String
+  updatedById String?
+  logoKey     String?
+  projects    Project[]
+  createdBy   User              @relation("WorkspaceCreatedBy", fields: [createdById], references: [id])
+  updatedBy   User?             @relation("WorkspaceUpdatedBy", fields: [updatedById], references: [id])
+  members     WorkspaceMember[]
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  invitedById String?
+  role        WorkspaceRole @default(MEMBER)
+  joinedAt    DateTime      @default(now())
+  invitedBy   User?         @relation("MemberInviter", fields: [invitedById], references: [id])
+  user        User          @relation("MemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+model Project {
+  id           String          @id @default(cuid())
+  name         String
+  slug         String          @unique
+  description  String?
+  status       ProjectStatus   @default(ACTIVE)
+  priority     Priority        @default(MEDIUM)
+  dueDate      DateTime?
+  coverColor   String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  createdById  String
+  updatedById  String?
+  workspaceId  String
+  activityLogs ActivityLog[]
+  attachments  Attachment[]
+  comments     Comment[]
+  createdBy    User            @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?           @relation("ProjectUpdatedBy", fields: [updatedById], references: [id])
+  workspace    Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  members      ProjectMember[]
+  tasks        Task[]
+}
+
+model ProjectMember {
+  id          String      @id @default(cuid())
+  projectId   String
+  userId      String
+  invitedById String?
+  role        ProjectRole @default(MEMBER)
+  joinedAt    DateTime    @default(now())
+  invitedBy   User?       @relation("MemberInviter", fields: [invitedById], references: [id])
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User        @relation("MemberUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  String
+  projectId String?
+  taskId    String?
+  author    User     @relation(fields: [authorId], references: [id])
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  filename     String
+  url          String
+  mimeType     String
+  size         Int
+  createdAt    DateTime @default(now())
+  uploadedById String
+  projectId    String?
+  taskId       String?
+  storageKey   String?
+  project      Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task         Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus   @default(TODO)
+  priority    Priority     @default(MEDIUM)
+  dueDate     DateTime?
+  position    Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  projectId   String
+  assigneeId  String?
+  createdById String
+  attachments Attachment[]
+  comments    Comment[]
+  assignee    User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdBy   User         @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  userId    String
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ProjectRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+  ON_HOLD
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
 }

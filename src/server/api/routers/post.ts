@@ -26,6 +26,51 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
+  update: protectedProcedure
+    .input(z.object({ id: z.number(), name: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.post.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+        },
+      });
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.post.delete({
+        where: {
+          id: input.id,
+        },
+      });
+    }),
+
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    return ctx.db.post.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
+
+  getById: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.post.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+    }),
+
   getLatest: protectedProcedure.query(async ({ ctx }) => {
     const post = await ctx.db.post.findFirst({
       orderBy: { createdAt: "desc" },
@@ -35,7 +80,4 @@ export const postRouter = createTRPCRouter({
     return post ?? null;
   }),
 
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
 });
