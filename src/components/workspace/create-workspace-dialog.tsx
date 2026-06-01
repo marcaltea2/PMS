@@ -57,6 +57,7 @@ export function CreateWorkSpace({ open, onOpenChange }: Props) {
       setUploading(true);
 
       let logoUrl = "";
+      let logoKey = "";
 
       // 1. upload file if selected
       if (file) {
@@ -76,12 +77,14 @@ export function CreateWorkSpace({ open, onOpenChange }: Props) {
         });
 
         logoUrl = result.url;
+        logoKey = result.storageKey ?? "";
       }
 
       // 2. create workspace with the uploaded url
       await createWorkspace.mutateAsync({
         name,
         logoUrl,
+        logoKey,
         slug: toSlug(name),
       });
 

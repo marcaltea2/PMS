@@ -9,6 +9,7 @@ export const workspaceRouter = createTRPCRouter({
       z.object({
         name: z.string().min(1),
         logoUrl: z.string().min(1),
+        logoKey: z.string().optional(),
         slug: z.string().min(1),
       }),
     )
@@ -17,6 +18,7 @@ export const workspaceRouter = createTRPCRouter({
         data: {
           name: input.name,
           logoUrl: input.logoUrl,
+          logoKey: input.logoKey,
           slug: input.slug,
           createdById: ctx.session.user.id,
           members: {
