@@ -101,4 +101,22 @@ export const workspaceRouter = createTRPCRouter({
         include: { members: true },
       });
     }),
+
+  getMembers: protectedProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.workspaceMember.findMany({
+        where: { workspaceId: input.workspaceId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              email: true,
+            },
+          },
+        },
+      });
+    }),
 });

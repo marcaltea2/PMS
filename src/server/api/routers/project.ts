@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { ProjectStatus, ProjectRole, Priority } from "@prisma/client";
+import { deleteFromR2 } from "~/server/r2/upload";
 
 export const projectRouter = createTRPCRouter({
   create: protectedProcedure
@@ -14,6 +15,7 @@ export const projectRouter = createTRPCRouter({
         priority: z.nativeEnum(Priority).default(Priority.MEDIUM),
         dueDate: z.date().optional(),
         coverColor: z.string().optional(),
+        members: z.array(z.string()).default([]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -30,10 +32,20 @@ export const projectRouter = createTRPCRouter({
           createdById: ctx.session.user.id,
 
           members: {
-            create: {
-              userId: ctx.session.user.id,
-              role: ProjectRole.OWNER,
-            },
+            create: [
+              {
+                userId: ctx.session.user.id,
+                role: ProjectRole.OWNER,
+              },
+
+              ...input.members
+                .filter((id) => id !== ctx.session.user.id) // avoid duplicate owner
+                .map((userId) => ({
+                  userId,
+                  role: ProjectRole.MEMBER,
+                  invitedById: ctx.session.user.id,
+                })),
+            ],
           },
         },
       });
@@ -71,11 +83,23 @@ export const projectRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // 1. get all attachments for this project
+      const attachments = await ctx.db.attachment.findMany({
+        where: { projectId: input.id },
+      });
+
+      // 2. delete each from R2
+      for (const attachment of attachments) {
+        if (attachment.storageKey) {
+          await deleteFromR2(attachment.storageKey);
+        }
+      }
+
+      // 3. delete project (DB cascades members, tasks, comments)
       return ctx.db.project.delete({
         where: { id: input.id },
       });
     }),
-
   getAll: protectedProcedure
     .input(
       z.object({
@@ -103,6 +127,8 @@ export const projectRouter = createTRPCRouter({
               },
             },
           },
+          
+          attachments: true,
         },
         orderBy: { createdAt: "desc" },
       });

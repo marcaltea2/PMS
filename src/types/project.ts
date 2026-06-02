@@ -15,6 +15,23 @@ export type ProjectMember = {
   } | null;
 };
 
+export type Member = {
+  id: string;
+  name: string | null;
+  image: string | null;
+  email: string | null;
+};
+
+export type ExistingAttachment = {
+  id: string;
+  filename: string;
+  url: string;
+  storageKey: string | null;
+  mimeType: string;
+  size: number;
+};
+
+
 export type Project = {
   id: string;
   name: string;
@@ -29,4 +46,12 @@ export type Project = {
   createdById: string;
   workspaceId: string;
   members: ProjectMember[];
+  attachments: {
+    id: string;
+    filename: string;
+    url: string;
+    storageKey: string | null;
+    mimeType: string;
+    size: number;
+  }[];
 };
