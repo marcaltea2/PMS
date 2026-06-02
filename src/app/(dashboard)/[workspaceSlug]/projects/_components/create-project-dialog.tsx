@@ -515,7 +515,7 @@ export function CreateProjectDialog({
           </div>
 
           {/* Cover Color */}
-          <div className="grid items-start gap-4 md:grid-cols-[140px_1fr]">
+          <div className="grid items-start gap-4 mb-2 md:grid-cols-[140px_1fr]">
             <Label className="pt-1">Cover Color</Label>
             <div className="flex flex-wrap gap-2">
               {COLOR_OPTIONS.map((color) => (
@@ -525,7 +525,7 @@ export function CreateProjectDialog({
                   title={color.label}
                   onClick={() => setCoverColor(color.value)}
                   className={cn(
-                    "h-7 w-7 rounded-full transition-all",
+                    "h-6 w-6 rounded-full transition-all",
                     coverColor === color.value
                       ? "ring-offset-background scale-110 ring-2 ring-offset-2"
                       : "opacity-70 hover:opacity-100",
