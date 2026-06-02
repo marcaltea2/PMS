@@ -44,7 +44,7 @@ import { getFileIcon } from "~/lib/helper/get-file-icon";
 import { truncateFileName } from "~/lib/helper/truncate-filename";
 
 // ===== Types =====
-import type { Project, ExistingAttachment, Member } from "~/types";
+import type { Project, Attachment, Member } from "~/types";
 
 // ===== Internal Components =====
 import { MemberCombobox } from "./member-combobox";
@@ -86,7 +86,7 @@ export function CreateProjectDialog({
   // ===== State: Attachments =====
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<ExistingAttachment[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<Attachment[]>([]);
   const [removedAttachmentIds, setRemovedAttachmentIds] = useState<string[]>([]);
 
   // ===== State: Team =====

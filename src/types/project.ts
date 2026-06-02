@@ -1,19 +1,8 @@
-// src/types/project.ts
-import type { ProjectStatus, ProjectRole, Priority } from "@prisma/client";
-
-export type ProjectMember = {
-  id: string;
-  projectId: string;
-  userId: string;
-  role: ProjectRole;
-  joinedAt: Date;
-  user: {
-    id: string;
-    name: string | null;
-    image: string | null;
-    email: string | null;
-  } | null;
-};
+import type {
+  Priority,
+  ProjectRole,
+  ProjectStatus,
+} from "@prisma/client";
 
 export type Member = {
   id: string;
@@ -22,7 +11,7 @@ export type Member = {
   email: string | null;
 };
 
-export type ExistingAttachment = {
+export type Attachment = {
   id: string;
   filename: string;
   url: string;
@@ -31,6 +20,14 @@ export type ExistingAttachment = {
   size: number;
 };
 
+export type ProjectMember = {
+  id: string;
+  projectId: string;
+  userId: string;
+  role: ProjectRole;
+  joinedAt: Date;
+  user: Member | null;
+};
 
 export type Project = {
   id: string;
@@ -41,17 +38,13 @@ export type Project = {
   priority: Priority;
   dueDate: Date | null;
   coverColor: string | null;
+
   createdAt: Date;
   updatedAt: Date;
+
   createdById: string;
   workspaceId: string;
+
   members: ProjectMember[];
-  attachments: {
-    id: string;
-    filename: string;
-    url: string;
-    storageKey: string | null;
-    mimeType: string;
-    size: number;
-  }[];
+  attachments: Attachment[];
 };
