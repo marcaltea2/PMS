@@ -1,8 +1,17 @@
 "use client";
 
+// ===== React =====
 import { useState } from "react";
+
+// ===== API =====
+import { api } from "~/trpc/react";
+
+// ===== Third-party =====
+import { toast } from "sonner";
 import { FolderKanban, MoreHorizontal, Calendar, Link2 } from "lucide-react";
 
+// ===== UI Components =====
+import { CreateProjectDialog } from "./create-project-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
@@ -25,12 +34,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { api } from "~/trpc/react";
 import { Skeleton } from "~/components/ui/skeleton";
-import { toast } from "sonner";
-import { CreateProjectDialog } from "./create-project-dialog";
+
+// ===== Lib =====
 import { toSlug } from "~/lib/to-slug";
 import type { ProjectStatus, Priority } from "@prisma/client";
+import {
+  STATUS_OPTIONS,
+  PRIORITY_OPTIONS,
+} from "~/lib/project-options";
 import type { Project } from "~/types";
 import { cn } from "~/lib/utils";
 
@@ -42,6 +54,7 @@ export function ProjectList({ workspaceId }: Props) {
   const utils = api.useUtils();
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
+
 
   const { data: projects, isLoading } = api.project.getAll.useQuery({
     workspaceId,
@@ -57,33 +70,48 @@ export function ProjectList({ workspaceId }: Props) {
   });
 
   const duplicateProject = api.project.create.useMutation({
-    onSuccess: async () => {
-      await utils.project.invalidate();
-      toast.success("Project duplicated.");
-    },
     onError: (err) => toast.error(err.message),
   });
 
-  const handleDuplicate = (project: Project) => {
-    duplicateProject.mutate({
-      workspaceId,
-      name: `${project.name} (copy)`,
-      slug: toSlug(`${project.name} copy`),
-      description: project.description ?? undefined,
-      status: project.status,
-      priority: project.priority,
-      dueDate: project.dueDate ?? undefined,
-      coverColor: project.coverColor ?? undefined,
-    });
-  };
+  const copyAttachments = api.attachments.Duplicate.useMutation({
+    onError: (err) => toast.error(err.message),
+  });
 
-  const statusLabel = (status: ProjectStatus) =>
-    ({
-      ACTIVE: "Active",
-      COMPLETED: "Completed",
-      ON_HOLD: "On hold",
-      ARCHIVED: "Archived",
-    })[status];
+  const handleDuplicate = async (project: Project) => {
+    try {
+      // 1. Create duplicate project
+      const duplicated = await duplicateProject.mutateAsync({
+        workspaceId,
+        name: `${project.name} (copy)`,
+        slug: toSlug(`${project.name} copy`),
+        description: project.description ?? undefined,
+        status: project.status,
+        priority: project.priority,
+        dueDate: project.dueDate ?? undefined,
+        coverColor: project.coverColor ?? undefined,
+        members: project.members?.map((m) => m.userId) ?? [],
+      });
+
+      // 2. Copy attachments to new R2 files
+      if (project.attachments?.length) {
+        await copyAttachments.mutateAsync({
+          projectId: duplicated.id,
+          attachments: project.attachments.map((a) => ({
+            filename: a.filename,
+            url: a.url,
+            mimeType: a.mimeType,
+            size: a.size,
+          })),
+        });
+      }
+
+      await utils.project.invalidate();
+      toast.success("Project duplicated.");
+    } catch (err) {
+      toast.error("Failed to duplicate project.");
+      console.error(err);
+    }
+  };
 
   const statusColor = (status: ProjectStatus) =>
     ({
@@ -96,18 +124,11 @@ export function ProjectList({ workspaceId }: Props) {
       ARCHIVED: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
     })[status];
 
-  const priorityLabel = (priority: Priority) =>
-    ({
-      LOW: "Low",
-      MEDIUM: "Medium",
-      HIGH: "High",
-      URGENT: "Urgent",
-    })[priority];
-
   const priorityColor = (priority: Priority) =>
     ({
       LOW: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400",
-      MEDIUM: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-400",
+      MEDIUM:
+        "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-400",
       HIGH: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400",
       URGENT: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     })[priority];
@@ -216,7 +237,10 @@ export function ProjectList({ workspaceId }: Props) {
                   <Badge
                     className={cn("text-[10px]", statusColor(project.status))}
                   >
-                    {statusLabel(project.status)}
+                    {
+                      STATUS_OPTIONS.find((s) => s.value === project.status)
+                        ?.label
+                    }
                   </Badge>
                   <Badge
                     className={cn(
@@ -224,7 +248,10 @@ export function ProjectList({ workspaceId }: Props) {
                       priorityColor(project.priority),
                     )}
                   >
-                    {priorityLabel(project.priority)}
+                    {
+                      PRIORITY_OPTIONS.find((p) => p.value === project.priority)
+                        ?.label
+                    }
                   </Badge>
                 </div>
 

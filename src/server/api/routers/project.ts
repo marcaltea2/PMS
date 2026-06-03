@@ -100,6 +100,7 @@ export const projectRouter = createTRPCRouter({
         where: { id: input.id },
       });
     }),
+    
   getAll: protectedProcedure
     .input(
       z.object({
@@ -127,7 +128,6 @@ export const projectRouter = createTRPCRouter({
               },
             },
           },
-          
           attachments: true,
         },
         orderBy: { createdAt: "desc" },

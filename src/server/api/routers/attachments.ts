@@ -16,7 +16,6 @@ export const attachmentsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      
       // 1. upload to R2
       const { url, key, filename } = await uploadToR2({
         fileData: input.fileData,
@@ -59,5 +58,55 @@ export const attachmentsRouter = createTRPCRouter({
       return ctx.db.attachment.delete({
         where: { id: input.id },
       });
+    }),
+
+  Duplicate: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        attachments: z.array(
+          z.object({
+            filename: z.string(),
+            url: z.string(), // original R2 URL to fetch from
+            mimeType: z.string(),
+            size: z.number(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const results = [];
+
+      for (const attachment of input.attachments) {
+        // 1. Fetch file from R2 server-side (no CORS issues from server)
+        const response = await fetch(attachment.url);
+        const buffer = Buffer.from(await response.arrayBuffer());
+        const base64 = buffer.toString("base64");
+
+        // 2. Upload as new file to R2
+        const { url, key } = await uploadToR2({
+          fileData: base64,
+          filename: attachment.filename,
+          mimeType: attachment.mimeType,
+          folder: "projects",
+        });
+
+        // 3. Save new DB record
+        const record = await ctx.db.attachment.create({
+          data: {
+            filename: attachment.filename,
+            url,
+            storageKey: key,
+            mimeType: attachment.mimeType,
+            size: attachment.size,
+            projectId: input.projectId,
+            uploadedById: ctx.session.user.id,
+          },
+        });
+
+        results.push(record);
+      }
+
+      return results;
     }),
 });
