@@ -6,26 +6,39 @@ import { useState, useEffect, useRef } from "react";
 // ===== Third-party =====
 import { format } from "date-fns";
 import {
-  Loader2, CalendarIcon, X,
-  Paperclip, UserPlus, Plus,
+  Loader2,
+  CalendarIcon,
+  X,
+  Paperclip,
+  UserPlus,
+  Plus,
 } from "lucide-react";
 import { ProjectStatus, Priority } from "@prisma/client";
 
 // ===== UI Components =====
 import {
-  Dialog, DialogContent, DialogDescription,
-  DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import {
-  Select, SelectContent, SelectItem,
-  SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "~/components/ui/select";
 import {
-  Popover, PopoverContent, PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "~/components/ui/popover";
 import { Calendar } from "~/components/ui/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -38,8 +51,15 @@ import { toast } from "sonner";
 import { cn } from "~/lib/utils";
 import { toBase64 } from "~/lib/to-base-64";
 import { toSlug } from "~/lib/to-slug";
-import { ALL_ATTACHMENT_ACCEPT, ALL_ATTACHMENT_TYPES } from "~/lib/constants/file-types";
-import { STATUS_OPTIONS, PRIORITY_OPTIONS, COLOR_OPTIONS } from "~/lib/project-options";
+import {
+  ALL_ATTACHMENT_ACCEPT,
+  ALL_ATTACHMENT_TYPES,
+} from "~/lib/constants/file-types";
+import {
+  STATUS_OPTIONS,
+  PRIORITY_OPTIONS,
+  COLOR_OPTIONS,
+} from "~/lib/project-options";
 import { getFileIcon } from "~/lib/helper/get-file-icon";
 import { truncateFileName } from "~/lib/helper/truncate-filename";
 
@@ -70,7 +90,6 @@ export function CreateProjectDialog({
   workspaceId,
   project,
 }: Props) {
-
   // ===== Setup =====
   const isEdit = !!project;
   const utils = api.useUtils();
@@ -86,8 +105,12 @@ export function CreateProjectDialog({
   // ===== State: Attachments =====
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<Attachment[]>([]);
-  const [removedAttachmentIds, setRemovedAttachmentIds] = useState<string[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<Attachment[]>(
+    [],
+  );
+  const [removedAttachmentIds, setRemovedAttachmentIds] = useState<string[]>(
+    [],
+  );
 
   // ===== State: Team =====
   const [members, setMembers] = useState<Member[]>([]);
@@ -244,8 +267,9 @@ export function CreateProjectDialog({
       const result = await saveProject();
       await syncAttachments(result.id);
       await utils.project.invalidate();
-      toast.success(isEdit ? "Project updated!" : "Project created!");
+
       handleClose();
+      toast.success(isEdit ? "Project updated!" : "Project created!");
     } catch (err) {
       toast.error("Something went wrong.");
       console.error(err);
@@ -272,7 +296,6 @@ export function CreateProjectDialog({
         </DialogHeader>
 
         <div className="max-h-[65vh] space-y-4 overflow-y-auto pr-1">
-
           {/* Name */}
           <div className="grid items-center gap-4 md:grid-cols-[140px_1fr]">
             <Label>Name</Label>
@@ -304,7 +327,6 @@ export function CreateProjectDialog({
               <span className="text-muted-foreground text-xs">(optional)</span>
             </Label>
             <div className="space-y-2">
-
               {/* Existing files */}
               {existingAttachments.map((a) => (
                 <div
@@ -391,7 +413,6 @@ export function CreateProjectDialog({
           <div className="grid items-start gap-4 md:grid-cols-[140px_1fr]">
             <Label className="pt-2">Team</Label>
             <div className="space-y-2">
-
               {/* Member pills */}
               {members.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
@@ -418,7 +439,10 @@ export function CreateProjectDialog({
                   ))}
 
                   {/* Add more button */}
-                  <Popover open={memberPopoverOpen} onOpenChange={setMemberPopoverOpen}>
+                  <Popover
+                    open={memberPopoverOpen}
+                    onOpenChange={setMemberPopoverOpen}
+                  >
                     <PopoverTrigger asChild>
                       <button
                         type="button"
@@ -440,9 +464,17 @@ export function CreateProjectDialog({
 
               {/* Empty state — show add button */}
               {members.length === 0 && (
-                <Popover open={memberPopoverOpen} onOpenChange={setMemberPopoverOpen}>
+                <Popover
+                  open={memberPopoverOpen}
+                  onOpenChange={setMemberPopoverOpen}
+                >
                   <PopoverTrigger asChild>
-                    <Button type="button" variant="outline" size="sm" className="w-full">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
                       <UserPlus className="mr-2 h-4 w-4" />
                       Add team members
                     </Button>
@@ -462,13 +494,18 @@ export function CreateProjectDialog({
           {/* Status */}
           <div className="grid items-center gap-4 md:grid-cols-[140px_1fr]">
             <Label>Status</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as ProjectStatus)}>
+            <Select
+              value={status}
+              onValueChange={(v) => setStatus(v as ProjectStatus)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {STATUS_OPTIONS.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -477,13 +514,18 @@ export function CreateProjectDialog({
           {/* Priority */}
           <div className="grid items-center gap-4 md:grid-cols-[140px_1fr]">
             <Label>Priority</Label>
-            <Select value={priority} onValueChange={(v) => setPriority(v as Priority)}>
+            <Select
+              value={priority}
+              onValueChange={(v) => setPriority(v as Priority)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {PRIORITY_OPTIONS.map((p) => (
-                  <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                  <SelectItem key={p.value} value={p.value}>
+                    {p.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -509,13 +551,17 @@ export function CreateProjectDialog({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={dueDate} onSelect={setDueDate} />
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                />
               </PopoverContent>
             </Popover>
           </div>
 
           {/* Cover Color */}
-          <div className="grid items-start gap-4 mb-2 md:grid-cols-[140px_1fr]">
+          <div className="mb-2 grid items-start gap-4 md:grid-cols-[140px_1fr]">
             <Label className="pt-1">Cover Color</Label>
             <div className="flex flex-wrap gap-2">
               {COLOR_OPTIONS.map((color) => (
@@ -535,7 +581,6 @@ export function CreateProjectDialog({
               ))}
             </div>
           </div>
-
         </div>
 
         <DialogFooter>
@@ -548,7 +593,11 @@ export function CreateProjectDialog({
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {isEdit ? "Saving..." : "Creating..."}
               </>
-            ) : isEdit ? "Save Changes" : "Create"}
+            ) : isEdit ? (
+              "Save Changes"
+            ) : (
+              "Create"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

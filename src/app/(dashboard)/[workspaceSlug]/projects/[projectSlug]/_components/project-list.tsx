@@ -171,7 +171,6 @@ export function ProjectList({ workspaceId }: Props) {
           <Card
             key={project.id}
             className="group hover:border-border cursor-pointer overflow-hidden transition-colors"
-            onClick={() => router.push(`/${workspaceSlug}/projects/${project.slug}`)}
             style={{
               borderTop: `5px solid ${project.coverColor ?? "#6366f1"}`,
             }}
@@ -191,7 +190,7 @@ export function ProjectList({ workspaceId }: Props) {
                   />
                 </div>
                 <div>
-                  <p className="text-sm leading-none font-medium">
+                  <p className="text-sm leading-none font-medium" onClick={() => router.push(`/${workspaceSlug}/projects/${project.slug}`)}>
                     {project.name}
                   </p>
                   {/* <p className="text-muted-foreground mt-0.5 text-xs">
