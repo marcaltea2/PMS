@@ -128,7 +128,11 @@ export const projectRouter = createTRPCRouter({
               },
             },
           },
-          attachments: true,
+          attachments: {
+            include: {
+              uploadedBy: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
       });

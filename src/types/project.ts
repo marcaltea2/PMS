@@ -4,20 +4,13 @@ import type {
   ProjectStatus,
 } from "@prisma/client";
 
+import type { Attachment } from "~/types";
+
 export type Member = {
   id: string;
   name: string | null;
   image: string | null;
   email: string | null;
-};
-
-export type Attachment = {
-  id: string;
-  filename: string;
-  url: string;
-  storageKey: string | null;
-  mimeType: string;
-  size: number;
 };
 
 export type ProjectMember = {
