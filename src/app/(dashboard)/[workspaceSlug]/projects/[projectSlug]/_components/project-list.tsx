@@ -2,6 +2,8 @@
 
 // ===== React =====
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 // ===== API =====
 import { api } from "~/trpc/react";
@@ -52,9 +54,11 @@ type Props = {
 
 export function ProjectList({ workspaceId }: Props) {
   const utils = api.useUtils();
+  const router = useRouter();
+  const params = useParams();
+  const workspaceSlug = params.workspaceSlug as string;
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
-
 
   const { data: projects, isLoading } = api.project.getAll.useQuery({
     workspaceId,
@@ -76,6 +80,7 @@ export function ProjectList({ workspaceId }: Props) {
   const copyAttachments = api.attachments.Duplicate.useMutation({
     onError: (err) => toast.error(err.message),
   });
+  
 
   const handleDuplicate = async (project: Project) => {
     try {
@@ -166,6 +171,7 @@ export function ProjectList({ workspaceId }: Props) {
           <Card
             key={project.id}
             className="group hover:border-border cursor-pointer overflow-hidden transition-colors"
+            onClick={() => router.push(`/${workspaceSlug}/projects/${project.slug}`)}
             style={{
               borderTop: `5px solid ${project.coverColor ?? "#6366f1"}`,
             }}
