@@ -45,7 +45,7 @@ import {
   STATUS_OPTIONS,
   PRIORITY_OPTIONS,
 } from "~/lib/project-options";
-import type { Project } from "~/types";
+import type { ProjectListItem  } from "~/types";
 import { cn } from "~/lib/utils";
 
 type Props = {
@@ -57,7 +57,7 @@ export function ProjectList({ workspaceId }: Props) {
   const router = useRouter();
   const params = useParams();
   const workspaceSlug = params.workspaceSlug as string;
-  const [editProject, setEditProject] = useState<Project | null>(null);
+  const [editProject, setEditProject] = useState<ProjectListItem | null>(null);
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
 
   const { data: projects, isLoading } = api.project.getAll.useQuery({
@@ -82,7 +82,7 @@ export function ProjectList({ workspaceId }: Props) {
   });
   
 
-  const handleDuplicate = async (project: Project) => {
+  const handleDuplicate = async (project: ProjectListItem) => {
     try {
       // 1. Create duplicate project
       const duplicated = await duplicateProject.mutateAsync({

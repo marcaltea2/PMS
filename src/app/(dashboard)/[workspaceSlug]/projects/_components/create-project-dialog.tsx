@@ -64,7 +64,7 @@ import { getFileIcon } from "~/lib/helper/get-file-icon";
 import { truncateFileName } from "~/lib/helper/truncate-filename";
 
 // ===== Types =====
-import type { Project, Attachment, Member } from "~/types";
+import type { ProjectListItem, ProjectAttachmentData, SelectedMember } from "~/types";
 
 // ===== Internal Components =====
 import { MemberCombobox } from "./member-combobox";
@@ -77,7 +77,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workspaceId: string;
-  project?: Project | null;
+  project?: ProjectListItem | null;
 };
 
 // ============================================================
@@ -105,7 +105,7 @@ export function CreateProjectDialog({
   // ===== State: Attachments =====
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<Attachment[]>(
+  const [existingAttachments, setExistingAttachments] = useState<ProjectAttachmentData[]>(
     [],
   );
   const [removedAttachmentIds, setRemovedAttachmentIds] = useState<string[]>(
@@ -113,7 +113,7 @@ export function CreateProjectDialog({
   );
 
   // ===== State: Team =====
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<SelectedMember[]>([]);
   const [memberPopoverOpen, setMemberPopoverOpen] = useState(false);
 
   // ===== Queries =====
@@ -188,7 +188,7 @@ export function CreateProjectDialog({
   };
 
   // ===== Handlers: Members =====
-  const handleAddMember = (member: Member) => {
+  const handleAddMember = (member: SelectedMember) => {
     setMembers((prev) => [...prev, member]);
     setMemberPopoverOpen(false);
   };

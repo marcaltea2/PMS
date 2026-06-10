@@ -45,13 +45,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
-
-type Workspace = {
-  id: string;
-  name: string;
-  logoUrl: string | null;
-  slug: string;
-};
+import type { WorkspaceListItem } from "~/types"
 
 export function AppSidebar({ session }: { session: Session }) {
   const pathname = usePathname();
@@ -85,7 +79,7 @@ export function AppSidebar({ session }: { session: Session }) {
   ];
 
   // Workspace switch handler
-  const handleSelectWorkspace = (workspace: Workspace) => {
+  const handleSelectWorkspace = (workspace: WorkspaceListItem) => {
     if (!workspace.slug) return;
     const newPath = pathname.replace(`/${workspaceSlug}`, `/${workspace.slug}`);
     router.push(newPath);

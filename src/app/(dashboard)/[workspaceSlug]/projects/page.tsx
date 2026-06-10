@@ -1,6 +1,6 @@
 import { HydrateClient } from "~/trpc/server";
-import { ProjectList } from "./[projectSlug]/_components/project-list";
-import { CreateProjectButton } from "./[projectSlug]/_components/create-project-button";
+import { ProjectList } from "./_components/project-list";
+import { CreateProjectButton } from "./_components/create-project-button";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { redirect } from "next/navigation";

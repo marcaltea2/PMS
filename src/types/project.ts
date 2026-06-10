@@ -1,43 +1,17 @@
-import type {
-  Priority,
-  ProjectRole,
-  ProjectStatus,
-} from "@prisma/client";
+import type { RouterOutputs } from "~/trpc/react";
 
-import type { Attachment } from "~/types";
+export type ProjectData = NonNullable<RouterOutputs["project"]["getProject"]>;
+export type ProjectListItem = RouterOutputs["project"]["getAll"][number];
+export type ProjectById = NonNullable<RouterOutputs["project"]["getById"]>;
 
-export type Member = {
+export type ProjectMemberData = ProjectData["members"][number];
+export type ProjectMemberUser = NonNullable<ProjectMemberData["user"]>;
+export type ProjectAttachmentData = ProjectData["attachments"][number];
+export type ProjectWorkspace = ProjectData["workspace"];
+
+export type SelectedMember = {
   id: string;
   name: string | null;
   image: string | null;
   email: string | null;
-};
-
-export type ProjectMember = {
-  id: string;
-  projectId: string;
-  userId: string;
-  role: ProjectRole;
-  joinedAt: Date;
-  user: Member | null;
-};
-
-export type Project = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  status: ProjectStatus;
-  priority: Priority;
-  dueDate: Date | null;
-  coverColor: string | null;
-
-  createdAt: Date;
-  updatedAt: Date;
-
-  createdById: string;
-  workspaceId: string;
-
-  members: ProjectMember[];
-  attachments: Attachment[];
 };

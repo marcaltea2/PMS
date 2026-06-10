@@ -1,11 +1,11 @@
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "~/components/ui/command";
 import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
-import type { Member, WorkspaceMember } from "~/types";
+import type { SelectedMember,  WorkspaceMember } from "~/types";
 
 type MemberComboboxProps = {
   workspaceMembers: WorkspaceMember[];
   selectedIds: string[];
-  onSelect: (member: Member) => void;
+  onSelect: (member: SelectedMember) => void;
 };
 
 export function MemberCombobox({

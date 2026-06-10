@@ -100,7 +100,7 @@ export const projectRouter = createTRPCRouter({
         where: { id: input.id },
       });
     }),
-    
+
   getAll: protectedProcedure
     .input(
       z.object({
@@ -118,14 +118,7 @@ export const projectRouter = createTRPCRouter({
         include: {
           members: {
             include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  image: true,
-                  email: true,
-                },
-              },
+              user: true,
             },
           },
           attachments: {
@@ -143,7 +136,44 @@ export const projectRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return ctx.db.project.findUnique({
         where: { id: input.id },
-        include: { members: true },
+        include: {
+          members: {
+            include: {
+              user: true,
+            },
+          },
+          attachments: {
+            include: {
+              uploadedBy: true,
+            },
+          },
+        },
+      });
+    }),
+
+  getProject: protectedProcedure
+    .input(z.object({ workspaceSlug: z.string(), projectSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.project.findFirst({
+        where: {
+          slug: input.projectSlug,
+          workspace: {
+            slug: input.workspaceSlug,
+          },
+        },
+        include: {
+          members: {
+            include: {
+              user: true,
+            },
+          },
+          attachments: {
+            include: {
+              uploadedBy: true,
+            },
+          },
+          workspace: true,
+        },
       });
     }),
 });

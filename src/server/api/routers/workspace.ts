@@ -108,14 +108,7 @@ export const workspaceRouter = createTRPCRouter({
       return ctx.db.workspaceMember.findMany({
         where: { workspaceId: input.workspaceId },
         include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-              email: true,
-            },
-          },
+          user: true,
         },
       });
     }),

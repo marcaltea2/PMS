@@ -1,4 +1,3 @@
-// src/app/(auth)/login/page.tsx
 import { redirect } from "next/navigation";
 import { auth } from "~/server/auth";
 import { LoginForm } from "./_components/login-form";
